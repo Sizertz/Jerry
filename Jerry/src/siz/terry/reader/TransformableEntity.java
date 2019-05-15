@@ -12,12 +12,12 @@ import siz.terry.math.Vector3;
 public class TransformableEntity extends Entity {
 	private Transform3D transform;
 
-	protected TransformableEntity(Node node) {
-		super(node);
+	protected TransformableEntity(Node node, LayerReader reader) {
+		super(node, reader);
 		Node transformNode;
 		try {
-			transformNode = (Node) LayerReader.getInstance()
-					.evaluate("//ECTransform[parent::entity[@id='" + this.getID() + "']]", XPathConstants.NODE);
+			transformNode = (Node) reader.evaluate("//ECTransform[parent::entity[@id='" + this.getID() + "']]",
+					XPathConstants.NODE);
 			this.transform = new Transform3D(transformNode.getAttributes().getNamedItem("rotation").getNodeValue(),
 					transformNode.getAttributes().getNamedItem("position").getNodeValue(),
 					transformNode.getAttributes().getNamedItem("scale").getNodeValue());
@@ -46,7 +46,6 @@ public class TransformableEntity extends Entity {
 		Vector3 oldScale = oldTransform.getScalingFactors();
 		Vector3 parentScale = parentTransform.getScalingFactors();
 
-
 		// translations
 		Vector3 parentInverseScale = new Vector3(1 / parentScale.get(0), 1 / parentScale.get(1),
 				1 / parentScale.get(2));
@@ -70,7 +69,7 @@ public class TransformableEntity extends Entity {
 				for (int j = 0; j < 3; j++) {
 					if (oldRotation.getColumn(i).equals(parentRotation.getColumn(j))
 							|| oldRotation.getColumn(i).equals(parentRotation.getColumn(j).scalarDot(-1))) {
-						System.out.println(oldScale.get(i) +"="+parentScale.get(j));
+						System.out.println(oldScale.get(i) + "=" + parentScale.get(j));
 						newScale.set(i, oldScale.get(i) / parentScale.get(j));
 						aligned[i] = true;
 						if (parentScale.get((j + 1) % 3) == parentScale.get((j + 2) % 3)) {
@@ -98,12 +97,12 @@ public class TransformableEntity extends Entity {
 
 	public void saveTransformToNode(Transform3D newTransform) {
 		try {
-			LayerReader.getInstance().evaluateSingleNode("//@rotation[ancestor::entity/@id='" + getID() + "']")
+			reader.evaluateSingleNode("//@rotation[ancestor::entity/@id='" + getID() + "']")
 					.setNodeValue(newTransform.getRotationAngles().toString());
-			LayerReader.getInstance().evaluateSingleNode("//@position[ancestor::entity/@id='" + getID() + "']")
-			.setNodeValue(newTransform.getTranslations().toString());
-			LayerReader.getInstance().evaluateSingleNode("//@scale[ancestor::entity/@id='" + getID() + "']")
-			.setNodeValue(newTransform.getScalingFactors().toString());
+			reader.evaluateSingleNode("//@position[ancestor::entity/@id='" + getID() + "']")
+					.setNodeValue(newTransform.getTranslations().toString());
+			reader.evaluateSingleNode("//@scale[ancestor::entity/@id='" + getID() + "']")
+					.setNodeValue(newTransform.getScalingFactors().toString());
 
 		} catch (XPathExpressionException e) {
 			e.printStackTrace();

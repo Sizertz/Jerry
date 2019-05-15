@@ -1,5 +1,7 @@
 package siz.terry.linker;
 
+import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,17 +12,58 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import siz.terry.math.Transform3D;
 import siz.terry.reader.Building;
 import siz.terry.reader.Entity;
+import siz.terry.reader.EntityFactory;
 import siz.terry.reader.Group;
 import siz.terry.reader.LayerReader;
+import siz.terry.reader.TransformableEntity;
 
 public class ToBuildingLinker {
-	private LayerReader reader;
+	private static LayerReader reader;
 
-	protected ToBuildingLinker() {
-		reader = LayerReader.getInstance();
-		reader.save("backup.layer");
+	public static void process(File file) {
+		// Read file
+		reader = new LayerReader(file);
+
+		// backup file
+		reader.save(file.getPath() + ".backup");
+
+		// find parent buildings
+		NodeList parents = findFutureParents();
+		System.out.println("parents found: " + parents.getLength());
+
+		Map<Building, List<Entity>> futureFamilies = new HashMap<>();
+		// find all children entities
+		for (int i = 0; i < parents.getLength(); i++) {
+			Building futureParent = EntityFactory.newBuilding(parents.item(i), reader);
+
+			List<Entity> futureChildren = futureParent.findContainerSiblings();
+
+			if (futureChildren == null) {
+				continue;
+			}
+
+			// compute new transforms for all children
+			for (Entity futureChild : futureChildren) {
+				Transform3D newTransform = futureChild.transformRelativeTo(futureParent);
+				System.out.println("New transform\n" + newTransform);
+
+				// overwrite nodes
+				if (futureChild instanceof TransformableEntity) {
+					System.out.println("Overwriting");
+					((TransformableEntity) futureChild).saveTransformToNode(newTransform);
+				}
+			}
+
+			futureFamilies.put(futureParent, futureChildren);
+		}
+
+		// link things in the XML
+		writeLink(futureFamilies);
+		// save to file
+		reader.save();
 	}
 
 	/**
@@ -30,7 +73,7 @@ public class ToBuildingLinker {
 	 * 
 	 * @return the parents in a NodeList
 	 */
-	public NodeList findFutureParents() {
+	public static NodeList findFutureParents() {
 		NodeList parents = null;
 		try {
 			parents = (NodeList) reader.getxPath().evaluate("//entity[@name='parent' and descendant::ECBuilding]",
@@ -41,19 +84,19 @@ public class ToBuildingLinker {
 		return parents;
 	}
 
-	public Element fromElement(String id) {
+	public static Element fromElement(String id) {
 		Element from = reader.getXmlDoc().createElement("from");
 		from.setAttribute("id", id);
 		return from;
 	}
 
-	public Element toElement(String id) {
+	public static Element toElement(String id) {
 		Element from = reader.getXmlDoc().createElement("to");
 		from.setAttribute("id", id);
 		return from;
 	}
 
-	public void writeLink(Map<Building, List<Entity>> futureFamilies) {
+	public static void writeLink(Map<Building, List<Entity>> futureFamilies) {
 		try {
 			for (Building parent : futureFamilies.keySet()) {
 				// Logical links
@@ -76,12 +119,10 @@ public class ToBuildingLinker {
 					from2.appendChild(toElement(child.getID()));
 				}
 
-				
-
 				// Take things out of groups and get them back into main <entities>
-				System.out.println("parent "+ parent);
-				System.out.println("container "+ parent.getContainer());
-				if(parent.getContainer() instanceof Group) {
+				System.out.println("parent " + parent);
+				System.out.println("container " + parent.getContainer());
+				if (parent.getContainer() instanceof Group) {
 					Node mainEntities = reader.evaluateSingleNode("/layer/entities");
 					parent.getNode().getParentNode().removeChild(parent.getNode());
 					mainEntities.appendChild(parent.getNode());
@@ -90,13 +131,16 @@ public class ToBuildingLinker {
 						mainEntities.appendChild(child.getNode());
 					}
 				}
-				
+
 				// Remove links with containers
 				String containerID = parent.getContainer().getID();
-				System.out.println(containerID);
+				System.out.println("containerID "+containerID);
 				Node containerFrom = reader.evaluateSingleNode("//from[@id='" + containerID + "']");
 				containerFrom.getParentNode().removeChild(containerFrom);
-				
+
+				// Remove "parent" names
+				parent.getNode().getAttributes().removeNamedItem("name");
+
 			}
 		} catch (XPathExpressionException e) {
 			e.printStackTrace();

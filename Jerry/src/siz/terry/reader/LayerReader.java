@@ -24,25 +24,19 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 public class LayerReader {
-	private static LayerReader _instance = null;
 	private File fileXML;
 	private Document xmlDoc;
 	private Element root;
 	private XPath xPath;
-
-	protected LayerReader() {
-
+	
+	public LayerReader(File file) {
+		initialise(file.getPath());
 	}
 
-	public static LayerReader getInstance() {
-		return _instance;
-	}
 
-	public static void initialise(String inputPath) {
-		_instance = new LayerReader();
-
+	public void initialise(String inputPath) {
 		// select file
-		_instance.fileXML = new File(inputPath);
+		this.fileXML = new File(inputPath);
 
 		// setup xml reading and manipulating
 		boolean tryAgain = true;
@@ -51,9 +45,9 @@ public class LayerReader {
 			try {
 				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 				DocumentBuilder builder = factory.newDocumentBuilder();
-				_instance.xmlDoc = builder.parse(_instance.fileXML);
-				_instance.root = _instance.xmlDoc.getDocumentElement();
-				_instance.xPath = XPathFactory.newInstance().newXPath();
+				this.xmlDoc = builder.parse(this.fileXML);
+				this.root = this.xmlDoc.getDocumentElement();
+				this.xPath = XPathFactory.newInstance().newXPath();
 				fail = false;
 			} catch (ParserConfigurationException | SAXException | IOException e) {
 				fail = true;
@@ -92,7 +86,7 @@ public class LayerReader {
 	}
 	
 	public Entity evaluateSingleEntity(String xPathExpression) throws XPathExpressionException {
-		return EntityFactory.newEntity((Node) this.xPath.evaluate(xPathExpression, this.root, XPathConstants.NODE));
+		return EntityFactory.newEntity((Node) this.xPath.evaluate(xPathExpression, this.root, XPathConstants.NODE), this);
 	}
 	
 	public Node evaluateSingleNode(String xPathExpression) throws XPathExpressionException {
@@ -120,4 +114,5 @@ public class LayerReader {
 		save(this.fileXML.getPath());
 	}
 
+	
 }

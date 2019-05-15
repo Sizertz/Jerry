@@ -13,9 +13,11 @@ import siz.terry.math.Transform3D;
 
 public class Entity {
 	protected Node node;
+	protected LayerReader reader;
 
-	protected Entity(Node node) {
+	protected Entity(Node node, LayerReader reader) {
 		this.node = node;
+		this.reader = reader;
 	}
 
 	public Node getNode() {
@@ -55,11 +57,11 @@ public class Entity {
 	public Entity getContainer() {
 		Entity container = null;
 		try {
-			Node from = (Node) LayerReader.getInstance().evaluate("//from[to/@id='" + this.getID() + "']",
+			Node from = (Node) reader.evaluate("//from[to/@id='" + this.getID() + "']",
 					XPathConstants.NODE);
 			if (from != null) {
 				String containerID = from.getAttributes().getNamedItem("id").getNodeValue();
-				container = LayerReader.getInstance().evaluateSingleEntity("//entity[@id='" + containerID + "']");
+				container = reader.evaluateSingleEntity("//entity[@id='" + containerID + "']");
 
 			}
 		} catch (XPathExpressionException e) {
@@ -78,13 +80,13 @@ public class Entity {
 		if (container != null) {
 			List<Entity> res = new ArrayList<>();
 			try {
-				NodeList toSiblings = (NodeList) LayerReader.getInstance().evaluate(
+				NodeList toSiblings = (NodeList) reader.evaluate(
 						"//from[@id='" + container.getID() + "']/to[@id!='" + this.getID() + "']",
 						XPathConstants.NODESET);
 
 				for (int i = 0; i < toSiblings.getLength(); i++) {
 					String siblingID = toSiblings.item(i).getAttributes().getNamedItem("id").getNodeValue();
-					res.add(LayerReader.getInstance().getEntityByID(siblingID));
+					res.add(reader.getEntityByID(siblingID));
 				}
 
 				return res;

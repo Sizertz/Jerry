@@ -4,8 +4,8 @@ import org.w3c.dom.Node;
 
 public class Building extends TransformableEntity {
 
-	protected Building(Node node) {
-		super(node);
+	protected Building(Node node, LayerReader reader) {
+		super(node, reader);
 	}
 
 	@Override
