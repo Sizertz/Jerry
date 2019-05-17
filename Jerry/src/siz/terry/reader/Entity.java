@@ -78,7 +78,7 @@ public class Entity {
 	public List<Entity> findContainerSiblings() {
 		Entity container = this.getContainer();
 		if (container != null && container instanceof Layer) {
-			List<Entity> res = new ArrayList<>();
+			List<Entity> res = new ArrayList<Entity>();
 			try {
 				NodeList toSiblings = (NodeList) reader.evaluate(
 						"//from[@id='" + container.getID() + "']/to[@id!='" + this.getID() + "']",

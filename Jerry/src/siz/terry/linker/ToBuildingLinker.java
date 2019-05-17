@@ -40,7 +40,7 @@ public class ToBuildingLinker {
 		NodeList parents = findFutureParents();
 		System.out.println("parents found: " + parents.getLength());
 
-		Map<Building, List<Entity>> futureFamilies = new HashMap<>();
+		Map<Building, List<Entity>> futureFamilies = new HashMap<Building, List<Entity>>();
 		// find all children entities
 		for (int i = 0; i < parents.getLength(); i++) {
 			Building futureParent = EntityFactory.newBuilding(parents.item(i), reader);
