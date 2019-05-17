@@ -1,9 +1,7 @@
 # Jerry
 Task automation and bug workarounds for TW:WH map makers
 
-## Features
-
-### Automated Building Linking
+## Automated Building Linking
 Entities can be linked to a building. They can then be moved and scaled relative to their parent building inside Terry and they will disappear in-game if the parent building gets destroyed.
 This is typically useful for making custom destructible buildings out of existing assets.
 This can be done by writing the link by hand in your .layer files provided that the parent building is at scale (1,1,1), position (0,0,0) and rotation (0,0,0).
