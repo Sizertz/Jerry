@@ -35,9 +35,8 @@ public class TransformableEntity extends Entity {
 	}
 
 	@Override
-	public Transform3D transformRelativeTo(TransformableEntity futureParent) {
+	public Transform3D transformRelativeTo(Transform3D parentTransform) {
 		Transform3D newTransform;
-		Transform3D parentTransform = futureParent.getTransform();
 		Transform3D oldTransform = this.getTransform();
 		Vector3 oldTranslation = oldTransform.getTranslations();
 		Vector3 parentTranslation = parentTransform.getTranslations();

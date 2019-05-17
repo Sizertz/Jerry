@@ -23,6 +23,12 @@ import siz.terry.reader.TransformableEntity;
 public class ToBuildingLinker {
 	private static LayerReader reader;
 
+	/**
+	 * Finds all the buildings named 'parent' in the provided .layer file and writes Logical and Transform links with all the other entities in the same layer.<br>
+	 * Creates a backup of the input file.<br>
+	 * 
+	 * @param file - the layer file you want to process
+	 */
 	public static void process(File file) {
 		// Read file
 		reader = new LayerReader(file);
@@ -38,6 +44,11 @@ public class ToBuildingLinker {
 		// find all children entities
 		for (int i = 0; i < parents.getLength(); i++) {
 			Building futureParent = EntityFactory.newBuilding(parents.item(i), reader);
+			
+			// only treat families that are grouped by layer
+			if(futureParent.getContainer() instanceof Group) {
+				continue;
+			}
 
 			List<Entity> futureChildren = futureParent.findContainerSiblings();
 
@@ -47,7 +58,7 @@ public class ToBuildingLinker {
 
 			// compute new transforms for all children
 			for (Entity futureChild : futureChildren) {
-				Transform3D newTransform = futureChild.transformRelativeTo(futureParent);
+				Transform3D newTransform = futureChild.transformRelativeTo(futureParent.getTransform());
 				System.out.println("New transform\n" + newTransform);
 
 				// overwrite nodes
@@ -56,7 +67,7 @@ public class ToBuildingLinker {
 					((TransformableEntity) futureChild).saveTransformToNode(newTransform);
 				}
 			}
-
+			
 			futureFamilies.put(futureParent, futureChildren);
 		}
 
@@ -118,20 +129,7 @@ public class ToBuildingLinker {
 				for (Entity child : futureFamilies.get(parent)) {
 					from2.appendChild(toElement(child.getID()));
 				}
-
-				// Take things out of groups and get them back into main <entities>
-				System.out.println("parent " + parent);
-				System.out.println("container " + parent.getContainer());
-				if (parent.getContainer() instanceof Group) {
-					Node mainEntities = reader.evaluateSingleNode("/layer/entities");
-					parent.getNode().getParentNode().removeChild(parent.getNode());
-					mainEntities.appendChild(parent.getNode());
-					for (Entity child : futureFamilies.get(parent)) {
-						child.getNode().getParentNode().removeChild(child.getNode());
-						mainEntities.appendChild(child.getNode());
-					}
-				}
-
+				
 				// Remove links with containers
 				String containerID = parent.getContainer().getID();
 				System.out.println("containerID "+containerID);

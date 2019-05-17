@@ -58,6 +58,19 @@ public class Transform3D {
 				Double.parseDouble(scalingFactors.split(" ")[1]), Double.parseDouble(scalingFactors.split(" ")[2]));
 		computeRotationMatrix();
 	}
+	
+	private Transform3D() {
+		
+	}
+	
+	public Transform3D inverse() {
+		Transform3D inverse=new Transform3D();
+		inverse.scalingFactors=new Vector3(1/this.scalingFactors.get(0),1/this.scalingFactors.get(1),1/this.scalingFactors.get(2));
+		inverse.translations=new Vector3(-this.translations.get(0), -this.translations.get(1), -this.translations.get(2));
+		inverse.rotation=Matrix3D.rotationX(-this.rotationAngles.get(0)).dot(Matrix3D.rotationY(-this.rotationAngles.get(1))).dot(Matrix3D.rotationZ(-this.rotationAngles.get(2)));
+		inverse.rotationAngles = Matrix3D.anglesFromRotationMatrix(rotation);
+		return inverse;
+	}
 
 	private void computeRotationMatrix() {
 		this.rotation = Matrix3D.rotation(this.rotationAngles.get(0), this.rotationAngles.get(1),

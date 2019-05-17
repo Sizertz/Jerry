@@ -77,7 +77,7 @@ public class Entity {
 	 */
 	public List<Entity> findContainerSiblings() {
 		Entity container = this.getContainer();
-		if (container != null) {
+		if (container != null && container instanceof Layer) {
 			List<Entity> res = new ArrayList<>();
 			try {
 				NodeList toSiblings = (NodeList) reader.evaluate(
@@ -106,7 +106,7 @@ public class Entity {
 	 *         of a (future) parent object. Returns null if this is not a
 	 *         TransformableEntity
 	 */
-	public Transform3D transformRelativeTo(TransformableEntity futureParent) {
+	public Transform3D transformRelativeTo(Transform3D parentTransform) {
 		return null;
 	}
 
