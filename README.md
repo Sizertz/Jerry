@@ -2,10 +2,8 @@
 Task automation and bug workarounds for TW:WH map makers
 
 ## Automated Building Linking
-Entities can be linked to a building. They can then be moved and scaled relative to their parent building inside Terry and they will disappear in-game if the parent building gets destroyed.
-
-This is typically useful for making custom destructible buildings out of existing assets.
-
+Entities can be linked to a building. They can then be moved and scaled relative to their parent building inside Terry and they will disappear in-game if the parent building gets destroyed.<br/>
+This is typically useful for making custom destructible buildings out of existing assets.<br/>
 This can be done by writing the link by hand in your .layer files provided that the parent building is at scale (1,1,1), position (0,0,0) and rotation (0,0,0).
 
 With Jerry, parents can have any position and rotation, though some constraints on scale remain due to limitations of Terry's way of storing transformations.
@@ -30,7 +28,7 @@ a recent-ish version of [Java](https://www.java.com/en/download/)
 3. Run jerry-linker.exe
 (If your version of Java is too old/badly installed, you should be directed to the Java download page)
   
-**The .jar way** (for people who like command line)
+**The .jar way** (for people who like command line)<br/>
 Download [jerry-linker.jar](https://github.com/Sizertz/Jerry/raw/master/Jerry/dist/jerry-linker.jar).
 
 You can use it just like the .exe (provided you've installed Java well enough to be able to run the jar by double-clicking it).
