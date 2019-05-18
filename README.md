@@ -1,5 +1,7 @@
 # Jerry
-Task automation and bug workarounds for TW:WH map makers
+Task automation and bug workarounds for TW:WH map makers.
+
+Written in Java and made to work with Terry, hence the name.
 
 ## Automated Building Linking
 Entities can be linked to a building. They can then be moved and scaled relative to their parent building inside Terry and they will disappear in-game if the parent building gets destroyed.<br/>
@@ -68,3 +70,9 @@ In short:
 **N.B**
 * If you do not meet these conditions, there is mathematically no way for children and parent to look the same before and after they are linked. Jerry will make sure that the parent looks the same and that the child has the correct position but its scaling will necessarily be off.
 * After you have linked child and parent, you can of course freely transform them.
+
+___
+Next on the workbench:
+* a workaround for the outfield height bug
+* a GUI
+
