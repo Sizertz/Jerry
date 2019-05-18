@@ -7,6 +7,7 @@ import org.w3c.dom.Node;
 
 import siz.terry.math.Matrix3D;
 import siz.terry.math.Transform3D;
+import siz.terry.math.Utils;
 import siz.terry.math.Vector3;
 
 public class TransformableEntity extends Entity {
@@ -52,12 +53,13 @@ public class TransformableEntity extends Entity {
 				.dot(Matrix3D.diagonal(parentInverseScale)));
 
 		// rotations
-		Matrix3D newRotation = oldRotation.dot(parentRotation.transpose());
+		Matrix3D newRotation = parentRotation.transpose().dot(oldRotation);
 		Vector3 newAngles = newRotation.anglesFromRotationMatrix();
 
 		// scale
 		Vector3 newScale = oldScale;
-		if (parentScale.get(0) == parentScale.get(1) && parentScale.get(0) == parentScale.get(2)) {
+		double cutOff = 1E-3;
+		if (Utils.approxEquals(cutOff, parentScale.get(0), parentScale.get(1), parentScale.get(2))) {
 			newScale = newScale.scalarDot(1 / parentScale.get(0));
 		} else {
 			boolean[] aligned = new boolean[3];
@@ -82,6 +84,8 @@ public class TransformableEntity extends Entity {
 			}
 			if (!aligned[0] || !aligned[1] || !aligned[2]) {
 				flagScale();
+				double averageScale = (parentScale.get(0)+parentScale.get(1)+parentScale.get(2))/3d;
+				newScale.scalarDot(averageScale);
 			}
 		}
 
@@ -91,7 +95,6 @@ public class TransformableEntity extends Entity {
 
 	private void flagScale() {
 		System.out.println("Proper scale cannot be computed for " + this);
-
 	}
 
 	public void saveTransformToNode(Transform3D newTransform) {

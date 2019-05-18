@@ -51,7 +51,12 @@ public class Matrix3D extends MatrixMN {
 		return new Matrix3D(colX, colY, colZ);
 	}
 
-	public static Matrix3D rotation(double x, double y, double z) {
+	
+	public static Matrix3D terryInverseRotationMatrix(double x, double y, double z) {
+		return new Matrix3D(rotationX(-x).dot(rotationY(-y).dot(rotationZ(-z))));
+	}
+	
+	public static Matrix3D terryRotationMatrix(double x, double y, double z) {
 		return new Matrix3D(rotationZ(z).dot(rotationY(y).dot(rotationX(x))));
 	}
 	

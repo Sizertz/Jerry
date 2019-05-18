@@ -10,6 +10,7 @@ public class Main {
 	public static void main(String[] args) {
 		// read input args
 		if (args.length > 0) {
+			System.out.println(args[0]);
 			File input = new File(args[0]);
 			if (input.isFile()) {
 				// input is a file; process it
@@ -36,5 +37,6 @@ public class Main {
 				}
 			}
 		}
+		
 	}
 }

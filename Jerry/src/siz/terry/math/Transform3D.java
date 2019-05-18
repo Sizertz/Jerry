@@ -73,7 +73,7 @@ public class Transform3D {
 	}
 
 	private void computeRotationMatrix() {
-		this.rotation = Matrix3D.rotation(this.rotationAngles.get(0), this.rotationAngles.get(1),
+		this.rotation = Matrix3D.terryRotationMatrix(this.rotationAngles.get(0), this.rotationAngles.get(1),
 				this.rotationAngles.get(2));
 	}
 

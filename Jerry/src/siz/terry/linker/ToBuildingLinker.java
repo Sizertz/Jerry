@@ -130,11 +130,13 @@ public class ToBuildingLinker {
 					from2.appendChild(toElement(child.getID()));
 				}
 				
-				// Remove links with containers
+				// Remove links with containing layer for children
 				String containerID = parent.getContainer().getID();
 				System.out.println("containerID "+containerID);
-				Node containerFrom = reader.evaluateSingleNode("//from[@id='" + containerID + "']");
-				containerFrom.getParentNode().removeChild(containerFrom);
+				for (Entity child : futureFamilies.get(parent)) {
+					Node containerTo = reader.evaluateSingleNode("//from[@id='" + containerID + "']/to[@id='" + child.getID() + "']");
+					containerTo.getParentNode().removeChild(containerTo);
+				}
 
 				// Remove "parent" names
 				parent.getNode().getAttributes().removeNamedItem("name");

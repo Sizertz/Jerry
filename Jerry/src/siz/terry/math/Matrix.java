@@ -69,7 +69,7 @@ public interface Matrix {
 				res += this.getCoeff(i, j) * this.getCoeff(i, j);
 			}
 		}
-		return res;
+		return Math.sqrt(res);
 	}
 
 	public default void prettyPrint() {
