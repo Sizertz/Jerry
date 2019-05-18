@@ -2,7 +2,7 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>console</headerType>
-  <jar>D:\Eclipse\Jerry\Jerry\Jerry-Building-Linker.jar</jar>
+  <jar>D:\Eclipse\Jerry\Jerry\dist\jerry-linker.jar</jar>
   <outfile>D:\Eclipse\Jerry\Jerry\dist\jerry-linker.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
