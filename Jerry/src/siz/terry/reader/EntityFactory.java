@@ -4,6 +4,7 @@ import org.w3c.dom.Node;
 
 public class EntityFactory {
 	public static Entity newEntity(Node node, LayerReader reader) {
+		
 		if (node == null) {
 			return null;
 		}
@@ -21,6 +22,10 @@ public class EntityFactory {
 			}
 
 			if (iterator.getNodeName().equals("ECSignature")) {
+				return new GroupSignature(node, reader);
+			}
+			
+			if (iterator.getNodeName().equals("ECGroup")) {
 				return new Group(node, reader);
 			}
 		}

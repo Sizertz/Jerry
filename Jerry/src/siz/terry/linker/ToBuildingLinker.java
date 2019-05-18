@@ -17,6 +17,7 @@ import siz.terry.reader.Building;
 import siz.terry.reader.Entity;
 import siz.terry.reader.EntityFactory;
 import siz.terry.reader.Group;
+import siz.terry.reader.GroupSignature;
 import siz.terry.reader.LayerReader;
 import siz.terry.reader.TransformableEntity;
 
@@ -43,15 +44,18 @@ public class ToBuildingLinker {
 		Map<Building, List<Entity>> futureFamilies = new HashMap<Building, List<Entity>>();
 		// find all children entities
 		for (int i = 0; i < parents.getLength(); i++) {
+			System.out.println("====================");
 			Building futureParent = EntityFactory.newBuilding(parents.item(i), reader);
+			System.out.println("parent "+i+" : "+futureParent);
 			
-			// only treat families that are grouped by layer
+			// ignore parents that are in groups
 			if(futureParent.getContainer() instanceof Group) {
 				continue;
 			}
 
 			List<Entity> futureChildren = futureParent.findContainerSiblings();
 
+			// ignore parents that have no future children
 			if (futureChildren == null) {
 				continue;
 			}
@@ -59,12 +63,29 @@ public class ToBuildingLinker {
 			// compute new transforms for all children
 			for (Entity futureChild : futureChildren) {
 				Transform3D newTransform = futureChild.transformRelativeTo(futureParent.getTransform());
-				System.out.println("New transform\n" + newTransform);
+				System.out.println("New transform for "+ futureChild+"\n" + newTransform);
 
 				// overwrite nodes
 				if (futureChild instanceof TransformableEntity) {
-					System.out.println("Overwriting");
+					System.out.println("Overwriting ");
 					((TransformableEntity) futureChild).saveTransformToNode(newTransform);
+				}
+				
+				// All (nested) signatures need to be transformed
+				if(futureChild instanceof Group) {
+					try {
+						NodeList signatures = (NodeList) reader.evaluate("//entity[@id='"+futureChild.getID()+"']//ECSignature/parent::entity", XPathConstants.NODESET);
+						for(int j=0; j<signatures.getLength(); j++) {
+							GroupSignature signature = (GroupSignature) EntityFactory.newEntity(signatures.item(j), reader);
+							Transform3D signatureTransform = signature.transformRelativeTo(futureParent.getTransform());
+							System.out.println("New transform for signature "+signature.getID()+"\n" + signatureTransform);
+							System.out.println("Overwriting");
+							signature.saveTransformToNode(signatureTransform);
+							
+						}
+					} catch (XPathExpressionException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 			

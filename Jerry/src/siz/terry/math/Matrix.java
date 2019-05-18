@@ -104,7 +104,7 @@ public interface Matrix {
 			}
 			str += "\n";
 		}
-		return str;
+		return str.substring(0, str.length()-2);
 	}
 	
 	public default Matrix scalarDot(double scalar) {

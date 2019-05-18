@@ -17,7 +17,7 @@ public class TransformableEntity extends Entity {
 		super(node, reader);
 		Node transformNode;
 		try {
-			transformNode = (Node) reader.evaluate("//ECTransform[parent::entity[@id='" + this.getID() + "']]",
+			transformNode = (Node) reader.evaluate("//entity[@id='" + this.getID() + "']/ECTransform",
 					XPathConstants.NODE);
 			this.transform = new Transform3D(transformNode.getAttributes().getNamedItem("rotation").getNodeValue(),
 					transformNode.getAttributes().getNamedItem("position").getNodeValue(),
@@ -99,11 +99,11 @@ public class TransformableEntity extends Entity {
 
 	public void saveTransformToNode(Transform3D newTransform) {
 		try {
-			reader.evaluateSingleNode("//@rotation[ancestor::entity/@id='" + getID() + "']")
+			reader.evaluateSingleNode("//entity[@id='" + getID() + "']/ECTransform/@rotation")
 					.setNodeValue(newTransform.getRotationAngles().toString());
-			reader.evaluateSingleNode("//@position[ancestor::entity/@id='" + getID() + "']")
+			reader.evaluateSingleNode("//entity[@id='" + getID() + "']/ECTransform/@position")
 					.setNodeValue(newTransform.getTranslations().toString());
-			reader.evaluateSingleNode("//@scale[ancestor::entity/@id='" + getID() + "']")
+			reader.evaluateSingleNode("//entity[@id='" + getID() + "']/ECTransform/@scale")
 					.setNodeValue(newTransform.getScalingFactors().toString());
 
 		} catch (XPathExpressionException e) {
