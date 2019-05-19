@@ -65,7 +65,6 @@ public class Vector implements Matrix {
 	}
 
 	public boolean equals(Vector other) {
-		Vector diff = this.minus(other);
-		return diff.transpose().dot(diff).get(0) < 1E-4;
+		return this.minus(other).norm() < 1E-3;
 	}
 }

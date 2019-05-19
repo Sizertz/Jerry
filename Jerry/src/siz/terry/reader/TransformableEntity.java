@@ -60,41 +60,21 @@ public class TransformableEntity extends Entity {
 		Vector3 newScale = oldScale;
 		double cutOff = 1E-3;
 		if (Utils.approxEquals(cutOff, parentScale.get(0), parentScale.get(1), parentScale.get(2))) {
+			// parent is uniformly scaled
+			// apply simplified formula for
 			newScale = newScale.scalarDot(1 / parentScale.get(0));
 		} else {
-			boolean[] aligned = new boolean[3];
+			// general formula
+			// should work if axes align
+			// and approximate if they don't
+			Matrix3D mat = Matrix3D.diagonal(parentScale).dot(parentRotation.transpose().dot(oldRotation));
 			for (int i = 0; i < 3; i++) {
-				aligned[i] = false;
-			}
-			for (int i = 0; i < 3; i++) {
-				for (int j = 0; j < 3; j++) {
-					if (oldRotation.getColumn(i).equals(parentRotation.getColumn(j))
-							|| oldRotation.getColumn(i).equals(parentRotation.getColumn(j).scalarDot(-1))) {
-						System.out.println(oldScale.get(i) + "=" + parentScale.get(j));
-						newScale.set(i, oldScale.get(i) / parentScale.get(j));
-						aligned[i] = true;
-						if (parentScale.get((j + 1) % 3) == parentScale.get((j + 2) % 3)) {
-							newScale.set((i + 1) % 3, oldScale.get((i + 1) % 3) / parentScale.get((j + 1) % 3));
-							newScale.set((i + 2) % 3, oldScale.get((i + 2) % 3) / parentScale.get((j + 1) % 3));
-							aligned[(i + 1) % 3] = true;
-							aligned[(i + 2) % 3] = true;
-						}
-					}
-				}
-			}
-			if (!aligned[0] || !aligned[1] || !aligned[2]) {
-				flagScale();
-				double averageScale = (parentScale.get(0)+parentScale.get(1)+parentScale.get(2))/3d;
-				newScale.scalarDot(averageScale);
-			}
+				newScale.set(i, oldScale.get(i) / mat.getColumn(i).norm());
+			}			
 		}
 
 		newTransform = new Transform3D(newAngles, newTranslations, newScale);
 		return newTransform;
-	}
-
-	private void flagScale() {
-		System.out.println("Proper scale cannot be computed for " + this);
 	}
 
 	public void saveTransformToNode(Transform3D newTransform) {
