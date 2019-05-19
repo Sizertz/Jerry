@@ -68,9 +68,10 @@ In short:
 * If the parent is scaled differently in all three directions, then all three axes of each future child need to line up with those of the parent. In other words, relative to the parent, future children need to be rotated by multiples of 90°.
 
 **N.B**
-* If you do not meet these conditions, there is mathematically no way for children and parent to look the same before and after they are linked. Jerry will make sure that the parent looks the same and that the child has the correct position but its scaling will necessarily be off.
+* If you do not meet these conditions, there is mathematically no way for children and parent to look the same before and after they are linked. Jerry will make sure that the parent looks the same and that the child has the correct position but its scaling and rotation can mathematically not be computed. An approximation formula is used that gives okayish results if the parent building's scale values aren't too different.
 * After you have linked child and parent, you can of course freely transform them.
 
+> **tl;dr: keep your parents scaled uniformly as long as you can** 
 ___
 Next on the workbench:
 * a workaround for the outfield height bug
