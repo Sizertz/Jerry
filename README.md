@@ -26,6 +26,7 @@ In short:
 * Placing the parent and its future children at the root of the file layer is currently un-supported. You need to create a layer for each parent.
 * Layers can't be children of a building (Terry crashes) but (nested) groups and other parent buildings can.
 * Jerry creates a backup copy of each layer file before it overwrites it. It'll be right next to the original and named è `yourTerryProject.fileLayerID.layer.backup`. The backup is overwritten every time without warning, so if things don't work, don't forget to restore the backup before you try re-running Jerry.
+* removing parent-child transform links can still only be done by hand: open your .layer file and remove the <to> tags with id that of your child
 
 ### How to run Jerry's linker tool
 **Requirements:**
