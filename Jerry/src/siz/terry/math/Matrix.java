@@ -126,4 +126,17 @@ public interface Matrix {
 		}
 		return result;
 	}
+	
+	/**
+	 * Finds and return the index of a column in the matrix or -1 if the provided column doesn't match.
+	 * @param column - a column Vector to search for in the matrix
+	 * @return the index of a column in the matrix or -1 if the provided column doesn't match.
+	 */
+	public default int indexOfColumn(Vector column) {
+		for(int i=0; i<getNColumns(); i++) {
+			if(getColumn(i).equals(column))
+				return i;
+		}
+		return -1;
+	}
 }
