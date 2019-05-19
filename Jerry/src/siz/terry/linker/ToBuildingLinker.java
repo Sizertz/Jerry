@@ -1,5 +1,7 @@
 package siz.terry.linker;
 
+import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,17 +12,90 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import siz.terry.math.Transform3D;
 import siz.terry.reader.Building;
 import siz.terry.reader.Entity;
+import siz.terry.reader.EntityFactory;
 import siz.terry.reader.Group;
+import siz.terry.reader.GroupSignature;
 import siz.terry.reader.LayerReader;
+import siz.terry.reader.TransformableEntity;
 
 public class ToBuildingLinker {
-	private LayerReader reader;
+	private static LayerReader reader;
 
-	protected ToBuildingLinker() {
-		reader = LayerReader.getInstance();
-		reader.save("backup.layer");
+	/**
+	 * Finds all the buildings named 'parent' in the provided .layer file and writes Logical and Transform links with all the other entities in the same layer.<br>
+	 * Creates a backup of the input file.<br>
+	 * 
+	 * @param file - the layer file you want to process
+	 */
+	public static void process(File file) {
+		// Read file
+		reader = new LayerReader(file);
+
+		// backup file
+		reader.save(file.getPath() + ".backup");
+
+		// find parent buildings
+		NodeList parents = findFutureParents();
+		System.out.println("parents found: " + parents.getLength());
+
+		Map<Building, List<Entity>> futureFamilies = new HashMap<Building, List<Entity>>();
+		// find all children entities
+		for (int i = 0; i < parents.getLength(); i++) {
+			System.out.println("====================");
+			Building futureParent = EntityFactory.newBuilding(parents.item(i), reader);
+			System.out.println("parent "+i+" : "+futureParent);
+			
+			// ignore parents that are in groups
+			if(futureParent.getContainer() instanceof Group) {
+				continue;
+			}
+
+			List<Entity> futureChildren = futureParent.findContainerSiblings();
+
+			// ignore parents that have no future children
+			if (futureChildren == null) {
+				continue;
+			}
+
+			// compute new transforms for all children
+			for (Entity futureChild : futureChildren) {
+				Transform3D newTransform = futureChild.transformRelativeTo(futureParent.getTransform());
+				System.out.println("New transform for "+ futureChild+"\n" + newTransform);
+
+				// overwrite nodes
+				if (futureChild instanceof TransformableEntity) {
+					System.out.println("Overwriting ");
+					((TransformableEntity) futureChild).saveTransformToNode(newTransform);
+				}
+				
+				// All (nested) signatures need to be transformed
+				if(futureChild instanceof Group) {
+					try {
+						NodeList signatures = (NodeList) reader.evaluate("//entity[@id='"+futureChild.getID()+"']//ECSignature/parent::entity", XPathConstants.NODESET);
+						for(int j=0; j<signatures.getLength(); j++) {
+							GroupSignature signature = (GroupSignature) EntityFactory.newEntity(signatures.item(j), reader);
+							Transform3D signatureTransform = signature.transformRelativeTo(futureParent.getTransform());
+							System.out.println("New transform for signature "+signature.getID()+"\n" + signatureTransform);
+							System.out.println("Overwriting");
+							signature.saveTransformToNode(signatureTransform);
+							
+						}
+					} catch (XPathExpressionException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			
+			futureFamilies.put(futureParent, futureChildren);
+		}
+
+		// link things in the XML
+		writeLink(futureFamilies);
+		// save to file
+		reader.save();
 	}
 
 	/**
@@ -30,7 +105,7 @@ public class ToBuildingLinker {
 	 * 
 	 * @return the parents in a NodeList
 	 */
-	public NodeList findFutureParents() {
+	public static NodeList findFutureParents() {
 		NodeList parents = null;
 		try {
 			parents = (NodeList) reader.getxPath().evaluate("//entity[@name='parent' and descendant::ECBuilding]",
@@ -41,19 +116,19 @@ public class ToBuildingLinker {
 		return parents;
 	}
 
-	public Element fromElement(String id) {
+	public static Element fromElement(String id) {
 		Element from = reader.getXmlDoc().createElement("from");
 		from.setAttribute("id", id);
 		return from;
 	}
 
-	public Element toElement(String id) {
+	public static Element toElement(String id) {
 		Element from = reader.getXmlDoc().createElement("to");
 		from.setAttribute("id", id);
 		return from;
 	}
 
-	public void writeLink(Map<Building, List<Entity>> futureFamilies) {
+	public static void writeLink(Map<Building, List<Entity>> futureFamilies) {
 		try {
 			for (Building parent : futureFamilies.keySet()) {
 				// Logical links
@@ -75,28 +150,18 @@ public class ToBuildingLinker {
 				for (Entity child : futureFamilies.get(parent)) {
 					from2.appendChild(toElement(child.getID()));
 				}
-
 				
-
-				// Take things out of groups and get them back into main <entities>
-				System.out.println("parent "+ parent);
-				System.out.println("container "+ parent.getContainer());
-				if(parent.getContainer() instanceof Group) {
-					Node mainEntities = reader.evaluateSingleNode("/layer/entities");
-					parent.getNode().getParentNode().removeChild(parent.getNode());
-					mainEntities.appendChild(parent.getNode());
-					for (Entity child : futureFamilies.get(parent)) {
-						child.getNode().getParentNode().removeChild(child.getNode());
-						mainEntities.appendChild(child.getNode());
-					}
-				}
-				
-				// Remove links with containers
+				// Remove links with containing layer for children
 				String containerID = parent.getContainer().getID();
-				System.out.println(containerID);
-				Node containerFrom = reader.evaluateSingleNode("//from[@id='" + containerID + "']");
-				containerFrom.getParentNode().removeChild(containerFrom);
-				
+				System.out.println("containerID "+containerID);
+				for (Entity child : futureFamilies.get(parent)) {
+					Node containerTo = reader.evaluateSingleNode("//from[@id='" + containerID + "']/to[@id='" + child.getID() + "']");
+					containerTo.getParentNode().removeChild(containerTo);
+				}
+
+				// Remove "parent" names
+				parent.getNode().getAttributes().removeNamedItem("name");
+
 			}
 		} catch (XPathExpressionException e) {
 			e.printStackTrace();

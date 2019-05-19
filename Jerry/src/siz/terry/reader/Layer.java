@@ -4,8 +4,8 @@ import org.w3c.dom.Node;
 
 public class Layer extends Entity {
 
-	public Layer(Node node) {
-		super(node);
+	public Layer(Node node, LayerReader reader) {
+		super(node,reader);
 	}
 
 	@Override

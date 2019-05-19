@@ -69,7 +69,7 @@ public interface Matrix {
 				res += this.getCoeff(i, j) * this.getCoeff(i, j);
 			}
 		}
-		return res;
+		return Math.sqrt(res);
 	}
 
 	public default void prettyPrint() {
@@ -104,7 +104,7 @@ public interface Matrix {
 			}
 			str += "\n";
 		}
-		return str;
+		return str.substring(0, str.length()-2);
 	}
 	
 	public default Matrix scalarDot(double scalar) {
@@ -125,5 +125,18 @@ public interface Matrix {
 			}
 		}
 		return result;
+	}
+	
+	/**
+	 * Finds and return the index of a column in the matrix or -1 if the provided column doesn't match.
+	 * @param column - a column Vector to search for in the matrix
+	 * @return the index of a column in the matrix or -1 if the provided column doesn't match.
+	 */
+	public default int indexOfColumn(Vector column) {
+		for(int i=0; i<getNColumns(); i++) {
+			if(getColumn(i).equals(column))
+				return i;
+		}
+		return -1;
 	}
 }
