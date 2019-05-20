@@ -18,6 +18,8 @@ In short:
 4. Re-open the map in Terry.
 5. Profit!
 
+![Jerry magic demo](./readme-images/jerry-magic.jpg)
+
 **N.B.**
 * The only constraint you should follow is that the parent's 3 scale values should be equal before you link it (unless you know what you are doing, see below).
 * There is no need to place the parent at (0,0,0) like when you do the link by hand. Jerry does the necessary math.
